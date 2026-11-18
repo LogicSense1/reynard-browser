@@ -49,6 +49,7 @@ final class RecentlyClosedTabCollectionViewCell: UICollectionViewCell {
     
     override init(frame: CGRect) {
         super.init(frame: frame)
+        registerForAppearanceTraitChanges()
         configureCell()
     }
     
@@ -67,14 +68,10 @@ final class RecentlyClosedTabCollectionViewCell: UICollectionViewCell {
         updatePillShadow()
     }
     
-    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
-        super.traitCollectionDidChange(previousTraitCollection)
-        
-        guard previousTraitCollection?.userInterfaceStyle != traitCollection.userInterfaceStyle else {
-            return
+    private func registerForAppearanceTraitChanges() {
+        registerForTraitChanges([UITraitUserInterfaceStyle.self]) { (self: Self, _: UITraitCollection) in
+            self.updateAppearance()
         }
-        
-        updateAppearance()
     }
     
     func configure(tab: TabManagementStore.RecentlyClosedTabSnapshot) {

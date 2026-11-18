@@ -77,6 +77,7 @@ final class FrequentlyVisitedSiteCardView: UIControl {
     
     override init(frame: CGRect) {
         super.init(frame: frame)
+        registerForAppearanceTraitChanges()
         configureCard()
     }
     
@@ -89,14 +90,10 @@ final class FrequentlyVisitedSiteCardView: UIControl {
         updateShadowPath()
     }
     
-    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
-        super.traitCollectionDidChange(previousTraitCollection)
-        
-        guard previousTraitCollection?.userInterfaceStyle != traitCollection.userInterfaceStyle else {
-            return
+    private func registerForAppearanceTraitChanges() {
+        registerForTraitChanges([UITraitUserInterfaceStyle.self]) { (self: Self, _: UITraitCollection) in
+            self.updateAppearance()
         }
-        
-        updateAppearance()
     }
     
     

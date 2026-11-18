@@ -12,6 +12,12 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
         guard let windowScene = (scene as? UIWindowScene) else { return }
+        // Pick the desktop/mobile default for the first page load from the
+        // window we are launching into, so restored tabs do not reload once
+        // the browser layout is resolved.
+        let sceneTraits = windowScene.traitCollection
+        Prefs.BrowsingSettings.windowPrefersDesktopWebsite = sceneTraits.userInterfaceIdiom == .pad
+        || (sceneTraits.horizontalSizeClass == .regular && sceneTraits.verticalSizeClass == .regular)
         
         let browserViewController = BrowserViewController()
         browserViewController.sessionManager.setApplicationForeground(scene.activationState != .background)
@@ -52,12 +58,14 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     
     func windowScene(
         _ windowScene: UIWindowScene,
-        didUpdate previousCoordinateSpace: UICoordinateSpace,
-        interfaceOrientation previousInterfaceOrientation: UIInterfaceOrientation,
-        traitCollection previousTraitCollection: UITraitCollection
+        didUpdateEffectiveGeometry previousEffectiveGeometry: UIWindowScene.Geometry
     ) {
+        guard windowScene.effectiveGeometry.interfaceOrientation != previousEffectiveGeometry.interfaceOrientation else {
+            return
+        }
+
         (window?.rootViewController as? BrowserViewController)?
-            .screenOrientationChanged(to: windowScene.interfaceOrientation)
+            .screenOrientationChanged(to: windowScene.effectiveGeometry.interfaceOrientation)
     }
     
     func sceneWillEnterForeground(_ scene: UIScene) {

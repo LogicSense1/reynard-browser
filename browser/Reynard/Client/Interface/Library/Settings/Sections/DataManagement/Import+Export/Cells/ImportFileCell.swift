@@ -24,11 +24,18 @@ final class ImportFileCell: UITableViewCell {
     private let fileNameLabel = UILabel()
     private let sizeLabel = UILabel()
     private var thumbnailRequest: QLThumbnailGenerator.Request?
+    private var configuredFile: (fileURL: URL, byteCount: Int64?)?
     
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         configureViews()
         installViews()
+        registerForTraitChanges([UITraitDisplayScale.self]) { (self: Self, _: UITraitCollection) in
+            guard let configuredFile = self.configuredFile else {
+                return
+            }
+            self.configure(fileURL: configuredFile.fileURL, byteCount: configuredFile.byteCount)
+        }
     }
     
     required init?(coder: NSCoder) {
@@ -82,6 +89,7 @@ final class ImportFileCell: UITableViewCell {
     }
     
     func configure(fileURL: URL, byteCount: Int64?) {
+        configuredFile = (fileURL, byteCount)
         fileNameLabel.text = fileURL.lastPathComponent
         sizeLabel.text = byteCount.map { ByteCountFormatter.string(fromByteCount: $0, countStyle: .file) }
         ?? NSLocalizedString("Unknown size", comment: "")
@@ -91,7 +99,7 @@ final class ImportFileCell: UITableViewCell {
         }
         fileIconView.image = UIImage(named: "reynard.document")
         let request = QLThumbnailGenerator.Request(
-            fileAt: fileURL, size: UX.thumbnailSize, scale: UIScreen.main.scale, representationTypes: .icon
+            fileAt: fileURL, size: UX.thumbnailSize, scale: traitCollection.displayScale, representationTypes: .icon
         )
         request.iconMode = true
         thumbnailRequest = request

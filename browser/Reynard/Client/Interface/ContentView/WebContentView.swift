@@ -59,6 +59,7 @@ final class WebContentView: UIView, UIScrollViewDelegate {
     
     override init(frame: CGRect) {
         super.init(frame: frame)
+        registerForAppearanceTraitChanges()
         configureHierarchy()
         configureConstraints()
         applyVisibility()
@@ -81,12 +82,10 @@ final class WebContentView: UIView, UIScrollViewDelegate {
         scrollToTopTriggerView.contentOffset.y = UX.scrollToTopTriggerOffset
     }
     
-    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
-        super.traitCollectionDidChange(previousTraitCollection)
-        guard previousTraitCollection?.hasDifferentColorAppearance(comparedTo: traitCollection) == true else {
-            return
+    private func registerForAppearanceTraitChanges() {
+        registerForTraitChanges(UITraitCollection.systemTraitsAffectingColorAppearance) { (self: Self, _: UITraitCollection) in
+            self.updateRefreshIndicatorTint()
         }
-        updateRefreshIndicatorTint()
     }
     
     private func configureHierarchy() {
@@ -538,8 +537,8 @@ private final class PullToRefreshGestureRecognizer: UIGestureRecognizer {
         return touchPosition.y - touchOrigin.y
     }
     var progress: CGFloat {
-        let isLandscapePhone = view?.traitCollection.userInterfaceIdiom == .phone &&
-        (view?.bounds.width ?? 0) > (view?.bounds.height ?? 0)
+        // Short pull distance only when vertical space is constrained.
+        let isLandscapePhone = view?.traitCollection.verticalSizeClass == .compact
         let refreshThreshold = isLandscapePhone
         ? WebContentView.UX.landscapePhoneRefreshThreshold
         : WebContentView.UX.refreshThreshold

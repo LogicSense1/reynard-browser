@@ -30,6 +30,7 @@ final class AppAppearanceOptionControl: UIControl {
     init(appearance: AppAppearance, symbolName: String, title: String) {
         self.appearance = appearance
         super.init(frame: .zero)
+        registerForAppearanceTraitChanges()
         configureAccessibility(title: title)
         configurePreview()
         configurePreviewImage(symbolName: symbolName)
@@ -43,14 +44,10 @@ final class AppAppearanceOptionControl: UIControl {
         fatalError("init(coder:) has not been implemented")
     }
     
-    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
-        super.traitCollectionDidChange(previousTraitCollection)
-        
-        guard previousTraitCollection?.userInterfaceStyle != traitCollection.userInterfaceStyle else {
-            return
+    private func registerForAppearanceTraitChanges() {
+        registerForTraitChanges([UITraitUserInterfaceStyle.self]) { (self: Self, _: UITraitCollection) in
+            self.displaySelection(selected: self.isSelected)
         }
-        
-        displaySelection(selected: isSelected)
     }
     
     func displaySelection(selected: Bool) {

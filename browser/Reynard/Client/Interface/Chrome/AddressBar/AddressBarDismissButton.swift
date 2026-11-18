@@ -22,6 +22,7 @@ final class AddressBarDismissButton: UIButton {
     
     override init(frame: CGRect) {
         super.init(frame: frame)
+        registerForAppearanceTraitChanges()
         configureAppearance()
     }
     
@@ -37,13 +38,10 @@ final class AddressBarDismissButton: UIButton {
         layer.shadowPath = UIBezierPath(roundedRect: bounds, cornerRadius: layer.cornerRadius).cgPath
     }
     
-    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
-        super.traitCollectionDidChange(previousTraitCollection)
-        guard previousTraitCollection?.userInterfaceStyle != traitCollection.userInterfaceStyle else {
-            return
+    private func registerForAppearanceTraitChanges() {
+        registerForTraitChanges([UITraitUserInterfaceStyle.self]) { (self: Self, _: UITraitCollection) in
+            self.updateBorderColor()
         }
-        
-        updateBorderColor()
     }
     
     // MARK: - Appearance

@@ -123,6 +123,7 @@ final class TabBarCell: UICollectionViewCell {
     
     override init(frame: CGRect) {
         super.init(frame: frame)
+        registerForAppearanceTraitChanges()
         configureAppearance()
         configureHierarchy()
         configureContentPriorities()
@@ -142,13 +143,10 @@ final class TabBarCell: UICollectionViewCell {
         tabContentView.layer.borderWidth = 0
     }
     
-    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
-        super.traitCollectionDidChange(previousTraitCollection)
-        guard previousTraitCollection?.userInterfaceStyle != traitCollection.userInterfaceStyle else {
-            return
+    private func registerForAppearanceTraitChanges() {
+        registerForTraitChanges([UITraitUserInterfaceStyle.self]) { (self: Self, _: UITraitCollection) in
+            self.updateBorderColor()
         }
-        
-        updateBorderColor()
     }
     
     // MARK: - Configuration

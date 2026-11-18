@@ -9,7 +9,9 @@ import UIKit
 
 private final class TabBarCollectionLayout: UICollectionViewFlowLayout {
     private enum UX {
-        static let separatorWidth: CGFloat = 2 / UIScreen.main.scale
+        static func separatorWidth(for traitCollection: UITraitCollection) -> CGFloat {
+            return 2 / traitCollection.displayScale
+        }
         static let separatorHeight: CGFloat = 20
     }
     
@@ -96,20 +98,22 @@ private final class TabBarCollectionLayout: UICollectionViewFlowLayout {
         after index: Int,
         in rect: CGRect?
     ) -> UICollectionViewLayoutAttributes? {
-        guard let leftAttributes = super.layoutAttributesForItem(at: IndexPath(item: index, section: 0)),
+        guard let collectionView,
+              let leftAttributes = super.layoutAttributesForItem(at: IndexPath(item: index, section: 0)),
               let rightAttributes = super.layoutAttributesForItem(at: IndexPath(item: index + 1, section: 0)) else {
             return nil
         }
         
+        let separatorWidth = UX.separatorWidth(for: collectionView.traitCollection)
         let centerX = (leftAttributes.frame.maxX + rightAttributes.frame.minX) / 2
         let frame = CGRect(
-            x: centerX - (UX.separatorWidth / 2),
+            x: centerX - (separatorWidth / 2),
             y: leftAttributes.frame.midY - (UX.separatorHeight / 2),
-            width: UX.separatorWidth,
+            width: separatorWidth,
             height: UX.separatorHeight
         )
         if let rect,
-           !rect.insetBy(dx: -UX.separatorWidth, dy: -UX.separatorHeight).intersects(frame) {
+           !rect.insetBy(dx: -separatorWidth, dy: -UX.separatorHeight).intersects(frame) {
             return nil
         }
         
@@ -167,6 +171,9 @@ final class TabBarCollection: UICollectionView, UIGestureRecognizerDelegate {
         configureLayout(layout)
         configureCollection()
         configureGestures()
+        registerForTraitChanges([UITraitDisplayScale.self]) { (self: Self, _: UITraitCollection) in
+            self.layout.invalidateLayout()
+        }
     }
     
     required init?(coder: NSCoder) {
